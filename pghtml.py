@@ -836,10 +836,18 @@ class Pghtml:
     def DTDcheck(self):
         """
         check for valid document type
+        update 2021.08.14 recognize HTML5 header
         """
         r = []
         r.append("[pass] Document Type Definition")
         cline = ""
+
+        # check for HTML5
+        if re.search("DOCTYPE html", self.wb[0], re.IGNORECASE):
+            r.append("       Document appears to be HTML5")
+            self.apl(r)
+            return
+
         for i, line in enumerate(self.wb):
             if "DTD" in line:
                 # find the DTD line and grab the next one
@@ -1006,12 +1014,19 @@ class Pghtml:
     def find_defined_CSS(self):
         """
         CSS user has defined is placed in udefcss map
+        update: 2021/08/14 HTML5 CSS block recognized
         """
         t = [] # place to build a CSS block
         i = 0
 
-        while i < len(self.wb) and not bool(re.search(r'style.*?type.*?text.*?css', self.wb[i])):
-            i += 1 # advance to <style type="text/css"> line
+        while i < len(self.wb):
+            style4 = bool(re.search(r'style.*?type.*?text.*?css', self.wb[i]))
+            style5 = bool(re.search(r'<style>', self.wb[i]))
+            if style4 or style5:
+                break
+            i += 1
+        if i == len(self.wb):
+            exit("no CSS definition found")
         i += 1 # move into the CSS
 
         while i < len(self.wb) and "</style>" not in self.wb[i]:
