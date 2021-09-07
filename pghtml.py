@@ -24,8 +24,8 @@ showh = False
 thetag = ""
 theoutline = []
 
-class MyHTMLParser(HTMLParser):
 
+class MyHTMLParser(HTMLParser):
     def handle_starttag(self, tag, attrs):
         global showh, thetag
         if tag in "h1h2h3h4h5h6":
@@ -42,13 +42,15 @@ class MyHTMLParser(HTMLParser):
         if tag in "h1h2h3h4h5h6":
             showh = False
             thetag = thetag.rstrip()
-            thetag = re.sub(r'\s+', ' ', thetag)
-            m = re.match(r'h(\d)', thetag)
+            thetag = re.sub(r"\s+", " ", thetag)
+            m = re.match(r"h(\d)", thetag)
             if m:
                 indent = "  " * int(m.group(1))
             theoutline.append("     " + indent + thetag)
 
+
 parser = MyHTMLParser()
+
 
 class Pghtml:
     """
@@ -201,7 +203,7 @@ class Pghtml:
             for line in adh:
                 self.ap("  {}".format(line))
 
-    # --------------------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
 
     def scanImages(self):
         """
@@ -315,17 +317,17 @@ class Pghtml:
         if len(under256K) > 0:
             s = ""
             for t in under256K:
-                s = "{} ({}K)".format(t[0], int(t[1]/1024))
+                s = "{} ({}K)".format(t[0], int(t[1] / 1024))
                 r.append("  {}".format(s))
         if len(above256K) > 0:
             s = ""
             for t in above256K:
-                s = "{} (☱{}K☷)".format(t[0], int(t[1]/1024))
+                s = "{} (☱{}K☷)".format(t[0], int(t[1] / 1024))
                 r.append("  {}".format(s))
         if len(above1M) > 0:
             s = ""
             for t in above1M:
-                s = "{} (☰{}K☷)".format(t[0], int(t[1]/1024))
+                s = "{} (☰{}K☷)".format(t[0], int(t[1] / 1024))
                 r.append("  {}".format(s))
         self.apl(r)
 
@@ -382,7 +384,9 @@ class Pghtml:
                 if int(width) < 650 or int(height) < 1000:
                     r[0] = re.sub("pass", "☰warn☷", r[0])
                     r.append(
-                        "       cover.jpg too small (actual: {}x{}, min: 650x1000)".format(width,height)
+                        "       cover.jpg too small (actual: {}x{}, min: 650x1000)".format(
+                            width, height
+                        )
                     )
         self.apl(r)
 
@@ -454,7 +458,7 @@ class Pghtml:
             m1 = re.search(r'[\'"]https?://www.gutenberg.org[\'"]>', line)
             m2 = re.search(r'[\'"]https?://www.gutenberg.org/donate/?[\'"]>', line)
             if m:
-                if m1 or m2: # ignore boilerplate links
+                if m1 or m2:  # ignore boilerplate links
                     continue
                 if not reported:
                     r.append("[info] unexpected external links present")
@@ -643,7 +647,7 @@ class Pghtml:
                     r2.append("  {}".format(stmp[:-2]))
                     stmp = ""
                 reported += 1
-        if stmp != "": # the final line of the targets report
+        if stmp != "":  # the final line of the targets report
             r2.append("  {}".format(stmp[:-2]))
         self.apl(r2)
 
@@ -982,9 +986,6 @@ class Pghtml:
         r.append("       {} class chapter, {} &lt;h2> tags".format(cchcount, h2count))
         self.apl(r)
 
-
-
-
     def pgTests(self):
         """
         consolidated tests particular to Project Gutenberg
@@ -1009,34 +1010,36 @@ class Pghtml:
                     mx2 = mx.split(" ")
                     for mx3 in mx2:
                         if mx3 != "":
-                             self.usedcss[mx3] = 1
+                            self.usedcss[mx3] = 1
 
     def find_defined_CSS(self):
         """
         CSS user has defined is placed in udefcss map
         update: 2021/08/14 HTML5 CSS block recognized
         """
-        t = [] # place to build a CSS block
+        t = []  # place to build a CSS block
         i = 0
 
         while i < len(self.wb):
-            style4 = bool(re.search(r'style.*?type.*?text.*?css', self.wb[i]))
-            style5 = bool(re.search(r'<style>', self.wb[i]))
+            style4 = bool(re.search(r"style.*?type.*?text.*?css", self.wb[i]))
+            style5 = bool(re.search(r"<style>", self.wb[i]))
             if style4 or style5:
                 break
             i += 1
         if i == len(self.wb):
             exit("no CSS definition found")
-        i += 1 # move into the CSS
+        i += 1  # move into the CSS
 
         while i < len(self.wb) and "</style>" not in self.wb[i]:
-            t.append(self.wb[i]) # append everything until the closing </style>
+            t.append(self.wb[i])  # append everything until the closing </style>
             i += 1
 
         # there may be a user's second CSS block (as used by DPC)
         # continue and look for another
 
-        while i < len(self.wb) and not bool(re.search(r'style.*?type.*?text.*?css', self.wb[i])):
+        while i < len(self.wb) and not bool(
+            re.search(r"style.*?type.*?text.*?css", self.wb[i])
+        ):
             i += 1  # advance; if no 2nd CSS will go to end
         i += 1
 
@@ -1048,22 +1051,22 @@ class Pghtml:
         i = 0
         while i < len(t):
             if t[i].strip().startswith("/*") and t[i].strip().endswith("*/"):
-                del(t[i])
+                del t[i]
                 continue
             if t[i].strip().startswith("/*"):
-                del(t[i])
+                del t[i]
                 while not t[i].strip().endswith("*/"):
-                    del(t[i])
-                del(t[i])
+                    del t[i]
+                del t[i]
             i += 1
 
         # unwrap CSS
         i = 0
         while i < len(t):
-            while i < len(t)-1 and t[i].count("{") != t[i].count("}"):
+            while i < len(t) - 1 and t[i].count("{") != t[i].count("}"):
                 t[i] = t[i] + " " + t[i + 1]
                 del t[i + 1]
-            if t[i].count("{") != t[i].count("}") :
+            if t[i].count("{") != t[i].count("}"):
                 s = re.sub(r"\s+", " ", t[i])
                 s = s.strip()
                 if len(s) > 40:
@@ -1101,7 +1104,7 @@ class Pghtml:
 
         for s in t:
             s = s.replace(".", " .")  # ".poem.apdx" becomes " .poem .apdx"
-            s = s.replace("  "," ")
+            s = s.replace("  ", " ")
             s = s.strip()
             s = s.replace(",", " ")  # splits h1,h2,h3 {}
             utmp = s.split(" ")  # splits .linegroup .group
@@ -1253,9 +1256,11 @@ class Pghtml:
             f1.write(line + "\n")
 
         f1.write("pghtml run report\n")
-        f1.write(f"run started: {str(datetime.datetime.now())}\n");
+        f1.write(f"run started: {str(datetime.datetime.now())}\n")
         f1.write("source file: {}\n".format(os.path.basename(self.srcfile)))
-        f1.write(f"<span style='background-color:#FFFFDD'>close this window to return to the UWB.</span>\n");
+        f1.write(
+            f"<span style='background-color:#FFFFDD'>close this window to return to the UWB.</span>\n"
+        )
 
         # output test results
         for s in self.t:
